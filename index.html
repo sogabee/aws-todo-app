@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>ToDo App</title>
+</head>
+<body>
+  <h1>My ToDo List</h1>
+
+  <!-- ToDo追加用フォーム -->
+  <form id="todo-form">
+    <input type="text" id="title" placeholder="タイトル" />
+    <input type="text" id="description" placeholder="説明" />
+    <button type="submit">追加</button>
+  </form>
+  
+  <!-- 一覧取得用ボタン -->
+  <button id="reload">一覧を再読み込み</button>
+
+  <!-- ToDoリスト表示エリア -->
+  <ul id="todo-list"></ul>
+  
+  <script>
+    // *** API GatewayのステージURL + /todos ***
+    const apiUrl = "https://z9g2mwmhif.execute-api.ap-southeast-2.amazonaws.com/dev/todos";
+
+    // ------------------------------
+    //   新規ToDoをPOSTする処理
+    // ------------------------------
+    document.getElementById('todo-form').addEventListener('submit', async (event) => {
+      event.preventDefault();  // フォームのデフォルト送信を防止
+
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+      
+      // API GatewayのPOSTエンドポイント (/todos) にJSONを送る
+      await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description })
+      });
+
+      alert('ToDoを追加しました');
+    });
+
+    // ------------------------------
+    //   ToDo一覧をGETして表示
+    // ------------------------------
+    document.getElementById('reload').addEventListener('click', async () => {
+      const response = await fetch(apiUrl);  // GETリクエスト
+      const todos = await response.json();
+
+      // 既存のリストをクリア
+      const ul = document.getElementById('todo-list');
+      ul.innerHTML = '';
+
+      // 取得したデータをリストに追加
+      todos.forEach(todo => {
+        const li = document.createElement('li');
+        li.textContent = todo.title + ' - ' + todo.description;
+        ul.appendChild(li);
+      });
+    });
+  </script>
+</body>
+</html>
